@@ -1,6 +1,6 @@
-#include <queue>
-
 #include "Dijkstra.h"
+
+#include <queue>
 
 Dijkstra::Dijkstra(const Mesh &mesh,
                    Mesh::VertexHandle source,

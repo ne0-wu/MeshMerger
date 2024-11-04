@@ -56,7 +56,7 @@ void MyGL::PickVertex::highlight_hovered_vertex(const Mesh &mesh,
 
     highlighted_vertex.update({mesh.get_vertex_position(vertex_id)});
 
-    std::cout << "hovered vertex: " << vertex_id << std::endl;
+    // std::cout << "hovered vertex: " << vertex_id << std::endl;
 
     basic_shader.use();
     basic_shader.set_MVP(mvp);

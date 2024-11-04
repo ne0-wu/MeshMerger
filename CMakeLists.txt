@@ -11,15 +11,15 @@ add_compile_definitions(_USE_MATH_DEFINES)
 
 add_subdirectory(MyGL)
 
-set(source_files
-    main.cpp
-    # Dijkstra.cpp
-)
-
 set(header_files
     Mesh.h
     MeshToGL.h
-    # Dijkstra.h
+    Dijkstra.h
+)
+
+set(source_files
+    main.cpp
+    Dijkstra.cpp
 )
 
 add_executable(${PROJECT_NAME}
