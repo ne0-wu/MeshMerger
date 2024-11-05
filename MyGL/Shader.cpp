@@ -1,7 +1,7 @@
 #include "Shader.h"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 MyGL::Shader::Shader(GLenum shader_type, const std::string &source) : type(shader_type)
 {
@@ -63,8 +63,7 @@ void MyGL::Shader::compile_from_source(const std::string &source)
     }
 }
 
-MyGL::ShaderProgram::ShaderProgram(const std::string &vertex_source,
-                                   const std::string &fragment_source,
+MyGL::ShaderProgram::ShaderProgram(const std::string &vertex_source, const std::string &fragment_source,
                                    const std::string &geometry_source)
 {
     create_shader_program();

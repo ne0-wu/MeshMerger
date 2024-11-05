@@ -1,6 +1,8 @@
 #include "LogConsole.h"
 
-MyGL::LogConsole::LogConsole() {}
+MyGL::LogConsole::LogConsole()
+{
+}
 
 void MyGL::LogConsole::clear()
 {

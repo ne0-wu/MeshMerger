@@ -1,6 +1,6 @@
-#include <stdexcept>
-
 #include "Window.h"
+
+#include <stdexcept>
 
 MyGL::Window::Window(int width, int height, std::string title)
 {

@@ -23,8 +23,7 @@ glm::mat4 MyGL::Camera::get_projection_matrix(float aspect_ratio) const
 // FPS camera class
 // ================
 
-MyGL::FpsCamera::FpsCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : yaw(yaw), pitch(pitch)
+MyGL::FpsCamera::FpsCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : yaw(yaw), pitch(pitch)
 {
     this->position = position;
     this->world_up = up;

@@ -1,31 +1,30 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 namespace MyGL
 {
-    class LineSegment
-    {
-    public:
-        LineSegment(const std::vector<glm::vec3> &vertices,
-                    const std::vector<GLuint> &indices);
+class LineSegment
+{
+  public:
+    LineSegment(const std::vector<glm::vec3> &vertices, const std::vector<GLuint> &indices);
 
-        ~LineSegment();
+    ~LineSegment();
 
-        void update();
+    void update();
 
-        void draw();
+    void draw();
 
-    private:
-        GLuint VAO, VBO, EBO;
+  private:
+    GLuint VAO, VBO, EBO;
 
-        const std::vector<glm::vec3> &vertices;
-        const std::vector<GLuint> &indices;
+    const std::vector<glm::vec3> &vertices;
+    const std::vector<GLuint> &indices;
 
-        void setup();
-    };
-}
+    void setup();
+};
+} // namespace MyGL

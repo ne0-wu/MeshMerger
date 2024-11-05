@@ -5,7 +5,7 @@
 
 class MeshToGL
 {
-public:
+  public:
     static std::vector<MyGL::Vertex> vertices(const Mesh &mesh)
     {
         std::vector<MyGL::Vertex> vertices;
@@ -19,9 +19,8 @@ public:
             const auto &point = mesh.point(v);
             const auto &normal = mesh.has_vertex_normals() ? mesh.normal(v) : zero3d;
             const auto &tex_coord = mesh.has_vertex_texcoords2D() ? mesh.texcoord2D(v) : zero2d;
-            vertices.push_back({{point[0], point[1], point[2]},
-                                {normal[0], normal[1], normal[2]},
-                                {tex_coord[0], tex_coord[1]}});
+            vertices.push_back(
+                {{point[0], point[1], point[2]}, {normal[0], normal[1], normal[2]}, {tex_coord[0], tex_coord[1]}});
         }
         return vertices;
     }

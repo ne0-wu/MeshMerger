@@ -3,12 +3,13 @@
 #include "Mesh.h"
 #include "MeshToGL.h"
 
-#include "MyGL/Window.h"
-#include "MyGL/Mesh.h"
-#include "MyGL/Shader.h"
-#include "MyGL/PickVertex.h"
 #include "MyGL/LogConsole.h"
+#include "MyGL/Mesh.h"
+#include "MyGL/PickVertex.h"
+#include "MyGL/Shader.h"
 #include "MyGL/Utils.h"
+#include "MyGL/Window.h"
+
 
 struct Flags
 {
@@ -47,8 +48,10 @@ int main()
         // Move mesh to [-1, 1]^3
         {
             Eigen::Vector3d center{0.0, 0.0, 0.0},
-                min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()},
-                max{std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min()};
+                min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
+                    std::numeric_limits<double>::max()},
+                max{std::numeric_limits<double>::min(), std::numeric_limits<double>::min(),
+                    std::numeric_limits<double>::min()};
             for (const auto &v : mesh.vertices())
             {
                 const auto &point = mesh.point(v);
@@ -96,8 +99,10 @@ int main()
             window.process_input();
             window.process_camera_input(camera, delta_time);
 
-            glm::mat4 model = glm::mat4(1.0f);                                     // for convenience, we represent the translation of models in the model matrix
-            glm::mat4 view = camera.get_view_matrix() * camera.get_model_matrix(); // and write the model matrix of the camera in the view matrix
+            glm::mat4 model =
+                glm::mat4(1.0f); // for convenience, we represent the translation of models in the model matrix
+            glm::mat4 view = camera.get_view_matrix() *
+                             camera.get_model_matrix(); // and write the model matrix of the camera in the view matrix
             auto [width, height] = window.get_framebuffer_size();
             glm::mat4 projection = camera.get_projection_matrix(static_cast<float>(width) / height);
 
@@ -107,8 +112,7 @@ int main()
             {
                 ImVec2 mouse_pos = ImGui::GetMousePos();
                 auto [width, height] = MyGL::get_viewport_size();
-                pick_vertex.pick({mouse_pos.x, height - mouse_pos.y}, gl_mesh,
-                                 {model, view, projection});
+                pick_vertex.pick({mouse_pos.x, height - mouse_pos.y}, gl_mesh, {model, view, projection});
             }
 
             // ImGUI
@@ -122,7 +126,8 @@ int main()
             ImGui::Checkbox("Draw wireframe", &flags.draw_wireframe);
 
             int currentItem = static_cast<int>(flags.draw_mode);
-            if (ImGui::Combo("Interaction Mode", &currentItem, InteractionModeItems, IM_ARRAYSIZE(InteractionModeItems)))
+            if (ImGui::Combo("Interaction Mode", &currentItem, InteractionModeItems,
+                             IM_ARRAYSIZE(InteractionModeItems)))
                 flags.draw_mode = static_cast<Flags::InteractionMode>(currentItem);
 
             ImGui::End();

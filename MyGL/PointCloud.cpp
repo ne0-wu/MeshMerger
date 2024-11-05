@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "Utils.h"
-
 MyGL::PointCloud::PointCloud(const std::vector<glm::vec3> &vertices)
 {
     setup(vertices);
@@ -28,7 +26,6 @@ void MyGL::PointCloud::update(const std::vector<glm::vec3> &vertices)
 
 void MyGL::PointCloud::draw() const
 {
-    auto [width, height] = MyGL::get_viewport_size();
     glPointSize(15.0); // TODO: remove magic number
 
     glBindVertexArray(VAO);

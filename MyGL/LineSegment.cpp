@@ -1,7 +1,6 @@
 #include "LineSegment.h"
 
-MyGL::LineSegment::LineSegment(const std::vector<glm::vec3> &vertices,
-                               const std::vector<GLuint> &indices)
+MyGL::LineSegment::LineSegment(const std::vector<glm::vec3> &vertices, const std::vector<GLuint> &indices)
     : vertices(vertices), indices(indices)
 {
     setup();

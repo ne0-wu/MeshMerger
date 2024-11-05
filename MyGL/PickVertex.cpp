@@ -7,8 +7,9 @@
 MyGL::PickVertex::PickVertex()
     : vertex_id_shader(read_file_to_string("data/shaders/pick_vertex.vert"),
                        read_file_to_string("data/shaders/pick_vertex.frag")),
-      basic_shader(read_file_to_string("data/shaders/basic.vert"),
-                   read_file_to_string("data/shaders/round_point.frag")) {}
+      basic_shader(read_file_to_string("data/shaders/basic.vert"), read_file_to_string("data/shaders/round_point.frag"))
+{
+}
 
 int MyGL::PickVertex::pick(const glm::ivec2 &pos, const Mesh &mesh,
                            const std::tuple<glm::mat4, glm::mat4, glm::mat4> &mvp)

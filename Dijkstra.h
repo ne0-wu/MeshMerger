@@ -1,20 +1,17 @@
 #pragma once
 
 #include "Mesh.h"
+#include <OpenMesh/Core/Utils/PropertyManager.hh>
 
 class Dijkstra
 {
-public:
+  public:
     // Constructor for non-targeted Dijkstra's algorithm
-    Dijkstra(const Mesh &mesh,
-             Mesh::VertexHandle source,
-             const OpenMesh::EProp<double> &edge_weight);
+    Dijkstra(const Mesh &mesh, Mesh::VertexHandle source, const OpenMesh::EProp<double> &edge_weight);
 
     // Constructor for targeted Dijkstra's algorithm
     // would terminate when the target is reached
-    Dijkstra(const Mesh &mesh,
-             Mesh::VertexHandle source,
-             Mesh::VertexHandle target,
+    Dijkstra(const Mesh &mesh, Mesh::VertexHandle source, Mesh::VertexHandle target,
              const OpenMesh::EProp<double> &edge_weight);
 
     void run();
@@ -29,7 +26,7 @@ public:
         return previous[vertex];
     }
 
-private:
+  private:
     const Mesh &mesh;
     Mesh::VertexHandle source;
     Mesh::VertexHandle target = Mesh::VertexHandle();

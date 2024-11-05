@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "Utils.h"
-
 MyGL::Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
 {
     setup(vertices, indices);
@@ -131,9 +129,6 @@ glm::vec3 MyGL::Mesh::get_vertex_position(GLuint index) const
 {
     glm::vec3 position;
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glGetBufferSubData(GL_ARRAY_BUFFER,
-                       index * sizeof(Vertex),
-                       sizeof(glm::vec3),
-                       &position);
+    glGetBufferSubData(GL_ARRAY_BUFFER, index * sizeof(Vertex), sizeof(glm::vec3), &position);
     return position;
 }

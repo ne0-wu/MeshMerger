@@ -4,6 +4,7 @@
 #include <tuple>
 
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
@@ -14,30 +15,30 @@
 
 namespace MyGL
 {
-    class Window
-    {
-    public:
-        Window(int width = 1280, int height = 720, std::string title = "Window");
-        ~Window();
+class Window
+{
+  public:
+    Window(int width = 1280, int height = 720, std::string title = "Window");
+    ~Window();
 
-        std::tuple<int, int> get_framebuffer_size() const;
+    std::tuple<int, int> get_framebuffer_size() const;
 
-        bool should_close() const;
-        void swap_buffers() const;
-        void poll_events() const;
+    bool should_close() const;
+    void swap_buffers() const;
+    void poll_events() const;
 
-        void process_input() const;
-        void process_camera_input(Camera &camera, float delta_time) const;
+    void process_input() const;
+    void process_camera_input(Camera &camera, float delta_time) const;
 
-        bool is_mouse_inside() const;
+    bool is_mouse_inside() const;
 
-    private:
-        GLFWwindow *window;
+  private:
+    GLFWwindow *window;
 
-        void setup_GLFW(int width, int height, std::string title);
-        void setup_GLAD() const;
-        void setup_ImGui() const;
+    void setup_GLFW(int width, int height, std::string title);
+    void setup_GLAD() const;
+    void setup_ImGui() const;
 
-        static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-    };
-}
+    static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+};
+} // namespace MyGL
