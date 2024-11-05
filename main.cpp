@@ -10,7 +10,6 @@
 #include "MyGL/Utils.h"
 #include "MyGL/Window.h"
 
-
 struct Flags
 {
     enum class InteractionMode

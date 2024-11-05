@@ -10,5 +10,5 @@ void main()
     if (radius > 0.5)
         discard;
 
-	FragColor = color;
+    FragColor = color;
 }
