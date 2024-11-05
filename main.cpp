@@ -150,19 +150,12 @@ int main()
             phong_shader.set_uniform("light_pos", glm::vec3(2.2f, 1.0f, 2.0f));
             phong_shader.set_uniform("light_color", glm::vec3(1.0f, 1.0f, 1.0f));
             phong_shader.set_uniform("view_pos", camera.get_position());
-
             gl_mesh.draw();
-
-            glEnable(GL_PROGRAM_POINT_SIZE);
-            glEnable(GL_POINT_SMOOTH);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             pick_vertex.highlight_hovered_vertex(gl_mesh, {model, view, projection});
 
-            ImGui::Render();
-
             // render imgui and swap buffers
+            ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             window.swap_buffers();
         }
