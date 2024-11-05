@@ -45,27 +45,25 @@ int main()
             throw std::runtime_error("Failed to read mesh from file");
 
         // Move mesh to [-1, 1]^3
+        glm::mat4 model; // for convenience, we represent translation of models in the model matrix
+        Eigen::Vector3d center{0.0, 0.0, 0.0},
+            min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max()},
+            max{std::numeric_limits<double>::min(), std::numeric_limits<double>::min(),
+                std::numeric_limits<double>::min()};
+        for (const auto &v : mesh.vertices())
         {
-            Eigen::Vector3d center{0.0, 0.0, 0.0},
-                min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
-                    std::numeric_limits<double>::max()},
-                max{std::numeric_limits<double>::min(), std::numeric_limits<double>::min(),
-                    std::numeric_limits<double>::min()};
-            for (const auto &v : mesh.vertices())
-            {
-                const auto &point = mesh.point(v);
-                min[0] = std::min(min[0], point[0]);
-                min[1] = std::min(min[1], point[1]);
-                min[2] = std::min(min[2], point[2]);
-                max[0] = std::max(max[0], point[0]);
-                max[1] = std::max(max[1], point[1]);
-                max[2] = std::max(max[2], point[2]);
-            }
-            center = (min + max) / 2.0;
-            const auto scale = 2.0 / (max - min).maxCoeff();
-            for (auto &v : mesh.vertices())
-                mesh.set_point(v, scale * (mesh.point(v) - center));
+            const auto &point = mesh.point(v);
+            min = min.cwiseMin(point);
+            max = max.cwiseMax(point);
         }
+        center = (min + max) / 2.0;
+        const auto scale = 2.0 / (max - min).maxCoeff();
+        // for (auto &v : mesh.vertices())
+        //     mesh.set_point(v, scale * (mesh.point(v) - center));
+
+        model = glm::scale(glm::mat4(1.0f), glm::vec3(scale)) *
+                glm::translate(glm::mat4(1.0f), glm::vec3(-center[0], -center[1], -center[2]));
 
         mesh.request_face_normals();
         mesh.request_vertex_normals();
@@ -98,10 +96,8 @@ int main()
             window.process_input();
             window.process_camera_input(camera, delta_time);
 
-            glm::mat4 model =
-                glm::mat4(1.0f); // for convenience, we represent the translation of models in the model matrix
-            glm::mat4 view = camera.get_view_matrix() *
-                             camera.get_model_matrix(); // and write the model matrix of the camera in the view matrix
+            // write the model matrix of camera in the view matrix
+            glm::mat4 view = camera.get_view_matrix() * camera.get_model_matrix();
             auto [width, height] = window.get_framebuffer_size();
             glm::mat4 projection = camera.get_projection_matrix(static_cast<float>(width) / height);
 
