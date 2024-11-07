@@ -1,5 +1,6 @@
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
+#include "Dijkstra.h"
 #include "Mesh.h"
 #include "MeshToGL.h"
 
@@ -23,7 +24,118 @@ struct Flags
 
 const char *InteractionModeItems[] = {"Default", "Select Vertex"};
 
+class StatusBar
+{
+  public:
+    StatusBar(const std::string &text) : text(text)
+    {
+    }
+
+    void set_text(const std::string &text)
+    {
+        this->text = text;
+    }
+
+    void draw()
+    {
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - 30));
+        ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 30));
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings |
+                                        ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration;
+        if (ImGui::Begin("##StatusBar", nullptr, window_flags))
+        {
+            float textHeight = ImGui::GetTextLineHeight();
+            ImGui::SetCursorPosY((30 - textHeight) * 0.5f);
+            ImGui::Text("%s", text.c_str());
+        }
+        ImGui::End();
+    }
+
+  private:
+    std::string text;
+} status_bar("no message");
+
 MyGL::LogConsole logger;
+
+// ==================================================
+
+class SelectSeam
+{
+  public:
+    SelectSeam(const Mesh &mesh) : mesh(mesh), gl_selected_vertices({glm::vec3(0.0f)})
+    {
+    }
+
+    void add_vertex(Mesh::VertexHandle new_vertex)
+    {
+        if (is_closed())
+        {
+            // The path is already closed
+            ; // Do nothing
+        }
+        else if (selected_vertices.empty())
+        {
+            // Start of the path
+            if (mesh.is_boundary(new_vertex))
+                // The first vertex should be on the boundary
+                selected_vertices.push_back(new_vertex);
+            update_gl_selected_vertices();
+        }
+        else
+        {
+            // Add the new vertex to the path
+            auto last_vertex = selected_vertices.back();
+            Dijkstra dijkstra = Dijkstra::compute(mesh, last_vertex, new_vertex);
+            if (dijkstra.has_path(new_vertex))
+            {
+                auto path = dijkstra.get_path(new_vertex);
+                selected_vertices.insert(selected_vertices.end(), path.begin(), path.end());
+            }
+            update_gl_selected_vertices();
+        }
+    }
+
+    bool is_closed() const
+    {
+        return selected_vertices.size() > 1 && mesh.is_boundary(selected_vertices.back());
+    }
+
+    void draw(const std::tuple<glm::mat4, glm::mat4, glm::mat4> &mvp) const
+    {
+        if (selected_vertices.size() > 0)
+        {
+            basic_shader.use();
+            basic_shader.set_MVP(mvp);
+            basic_shader.set_uniform("color", color);
+            gl_selected_vertices.draw();
+        }
+    }
+
+  private:
+    void update_gl_selected_vertices()
+    {
+        std::vector<glm::vec3> vertices;
+        vertices.reserve(selected_vertices.size());
+        for (const auto &v : selected_vertices)
+        {
+            auto point = mesh.point(v);
+            vertices.emplace_back(point[0], point[1], point[2]);
+        }
+        gl_selected_vertices.update(vertices);
+    }
+
+    const Mesh &mesh;
+    std::vector<Mesh::VertexHandle> selected_vertices;
+    MyGL::PointCloud gl_selected_vertices;
+
+    MyGL::ShaderProgram basic_shader{MyGL::read_file_to_string("data/shaders/basic.vert"),
+                                     MyGL::read_file_to_string("data/shaders/round_point.frag")};
+
+    glm::vec4 color{0.7f, 0.2f, 0.6f, 1.0f};
+};
+
+// ==================================================
 
 int main()
 {
@@ -41,8 +153,10 @@ int main()
 
         // Load mesh from file
         Mesh mesh;
-        if (!OpenMesh::IO::read_mesh(mesh, "data/models/stanford-bunny.obj"))
+        if (!OpenMesh::IO::read_mesh(mesh, "data/models/camelhead.obj"))
             throw std::runtime_error("Failed to read mesh from file");
+
+        SelectSeam select_seam_0(mesh);
 
         // Move mesh to [-1, 1]^3
         glm::mat4 model; // for convenience, we represent translation of models in the model matrix
@@ -59,12 +173,11 @@ int main()
         }
         center = (min + max) / 2.0;
         const auto scale = 2.0 / (max - min).maxCoeff();
-        // for (auto &v : mesh.vertices())
-        //     mesh.set_point(v, scale * (mesh.point(v) - center));
 
         model = glm::scale(glm::mat4(1.0f), glm::vec3(scale)) *
                 glm::translate(glm::mat4(1.0f), glm::vec3(-center[0], -center[1], -center[2]));
 
+        // Compute normals (for Phong shading)
         mesh.request_face_normals();
         mesh.request_vertex_normals();
         mesh.update_normals();
@@ -110,6 +223,12 @@ int main()
                 pick_vertex.pick({mouse_pos.x, height - mouse_pos.y}, gl_mesh, {model, view, projection});
             }
 
+            auto selected_vertex = Mesh::VertexHandle(pick_vertex.get_picked_vertex());
+            if (ImGui::IsMouseClicked(0) && selected_vertex.is_valid())
+            {
+                select_seam_0.add_vertex(selected_vertex);
+            }
+
             // ImGUI
             // ==================================================
             ImGui_ImplOpenGL3_NewFrame();
@@ -126,6 +245,8 @@ int main()
                 flags.draw_mode = static_cast<Flags::InteractionMode>(currentItem);
 
             ImGui::End();
+
+            status_bar.draw();
 
             logger.draw();
 
@@ -153,6 +274,8 @@ int main()
             gl_mesh.draw();
 
             pick_vertex.highlight_hovered_vertex(gl_mesh, {model, view, projection});
+
+            select_seam_0.draw({model, view, projection});
 
             // render imgui and swap buffers
             ImGui::Render();
