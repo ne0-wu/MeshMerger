@@ -2,48 +2,63 @@
 
 #include <queue>
 
-Dijkstra::Dijkstra(const Mesh &mesh, Mesh::VertexHandle source, const OpenMesh::EProp<double> &edge_weight)
-    : mesh(mesh), source(source), edge_weight(edge_weight), distance(std::numeric_limits<double>::infinity(), mesh),
-      previous(Mesh::VertexHandle(), mesh)
+Dijkstra::Dijkstra(const Mesh &mesh, EdgeWeightFunc edge_weight, Mesh::VertexHandle source, Mesh::VertexHandle target)
+    : mesh(mesh), edge_weight(edge_weight), source(source), target(target),
+      distance(std::numeric_limits<double>::infinity(), mesh), previous(Mesh::VertexHandle(), mesh)
 {
 }
 
-Dijkstra::Dijkstra(const Mesh &mesh, Mesh::VertexHandle source, Mesh::VertexHandle target,
-                   const OpenMesh::EProp<double> &edge_weight)
-    : mesh(mesh), source(source), target(target), edge_weight(edge_weight),
-      distance(std::numeric_limits<double>::infinity(), mesh), previous(Mesh::VertexHandle(), mesh)
+Dijkstra::Dijkstra(const Mesh &mesh, Mesh::VertexHandle source, Mesh::VertexHandle target)
+    : Dijkstra(
+          mesh,
+          [&mesh](Mesh::EdgeHandle e) -> double {
+              auto he = mesh.halfedge_handle(e, 0);
+              return (mesh.point(mesh.to_vertex_handle(he)) - mesh.point(mesh.from_vertex_handle(he))).norm();
+          },
+          source, target)
+{
+}
+
+Dijkstra::Dijkstra(const Mesh &mesh, const OpenMesh::EProp<double> &weights, Mesh::VertexHandle source,
+                   Mesh::VertexHandle target)
+    : Dijkstra(mesh, [&weights](Mesh::EdgeHandle e) -> double { return weights[e]; }, source, target)
 {
 }
 
 void Dijkstra::run()
 {
-    distance[source] = 0.0;
+    using QueueElem = std::pair<double, Mesh::VertexHandle>;
+    std::priority_queue<QueueElem, std::vector<QueueElem>, std::greater<>> queue;
+    std::vector<bool> visited(mesh.n_vertices(), false);
 
-    std::priority_queue<std::pair<double, Mesh::VertexHandle>, std::vector<std::pair<double, Mesh::VertexHandle>>,
-                        std::greater<>>
-        queue;
+    distance[source] = 0.0;
     queue.push({0.0, source});
 
     while (!queue.empty())
     {
-        auto [d, fr] = queue.top();
+        auto [dist, current] = queue.top();
         queue.pop();
 
-        if (d > distance[fr])
+        if (visited[current.idx()])
             continue;
+        visited[current.idx()] = true;
 
-        if (fr == target)
+        if (current == target)
             break;
 
-        for (const auto &to : mesh.vv_range(fr))
+        for (const auto &half_edge : mesh.voh_range(current))
         {
-            const auto w = edge_weight[mesh.find_halfedge(fr, to).edge()];
+            auto neighbor = mesh.to_vertex_handle(half_edge);
 
-            if (distance[to] > distance[fr] + w)
+            if (visited[neighbor.idx()])
+                continue;
+
+            auto new_dist = dist + edge_weight(half_edge.edge());
+            if (new_dist < distance[neighbor])
             {
-                distance[to] = distance[fr] + w;
-                previous[to] = fr;
-                queue.push({distance[to], to});
+                distance[neighbor] = new_dist;
+                previous[neighbor] = current;
+                queue.push({new_dist, neighbor});
             }
         }
     }
