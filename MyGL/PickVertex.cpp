@@ -43,8 +43,6 @@ int MyGL::PickVertex::pick(const glm::ivec2 &pos, const Mesh &mesh,
     int index = static_cast<int>(pixel[0] + (pixel[1] << 8) + (pixel[2] << 16)) - 1;
     vertex_id = index;
 
-    std::cout << "Picked vertex: " << index << std::endl;
-
     if (multisample_enabled)
         glEnable(GL_MULTISAMPLE);
 
