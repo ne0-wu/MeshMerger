@@ -18,7 +18,7 @@ namespace MyGL
 class Window
 {
   public:
-    Window(int width = 1280, int height = 720, std::string title = "Window");
+    Window(int width = 1800, int height = 1200, std::string title = "Window");
     ~Window();
 
     std::tuple<int, int> get_framebuffer_size() const;
