@@ -71,6 +71,8 @@ class Mesh
     GLuint VAO, VBO, EBO;
     GLuint num_indices, num_vertices;
 
+    static void check_mesh_validity(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices);
+
     void setup(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices);
     void setup_VBO(const std::vector<Vertex> &vertices);
     void setup_EBO(const std::vector<GLuint> &indices);

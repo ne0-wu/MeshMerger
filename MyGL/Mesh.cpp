@@ -38,16 +38,21 @@ void MyGL::Mesh::draw(DrawMode mode) const
 
     glBindVertexArray(0);
 }
-void MyGL::Mesh::setup(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
+
+void MyGL::Mesh::check_mesh_validity(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
 {
-    auto max_index = std::max_element(indices.begin(), indices.end());
-    if (max_index != indices.end() && *max_index >= vertices.size())
-        throw std::runtime_error("Mesh setup failed: index out of bounds. Max index: " + std::to_string(*max_index) +
-                                 ", vertex count: " + std::to_string(vertices.size()));
+    auto max_index_iter = std::max_element(indices.begin(), indices.end());
+    if (max_index_iter != indices.end() && *max_index_iter >= vertices.size())
+        throw std::runtime_error(
+            "Mesh setup failed: index out of bounds. Max index: " + std::to_string(*max_index_iter) +
+            ", vertex count: " + std::to_string(vertices.size()));
 
     if (indices.size() % 3 != 0)
         throw std::runtime_error("Mesh setup failed: index count must be multiple of 3");
+}
 
+void MyGL::Mesh::setup(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
+{
     num_indices = indices.size();
     num_vertices = vertices.size();
 
@@ -69,6 +74,8 @@ void MyGL::Mesh::setup(const std::vector<Vertex> &vertices, const std::vector<GL
         glDeleteBuffers(1, &VBO);
         throw std::runtime_error("Mesh setup failed: Failed to generate EBO");
     }
+
+    check_mesh_validity(vertices, indices);
 
     setup_VBO(vertices);
     setup_EBO(indices);
@@ -105,6 +112,11 @@ void MyGL::Mesh::setup_EBO(const std::vector<GLuint> &indices)
 
 void MyGL::Mesh::update(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
 {
+    num_vertices = vertices.size();
+    num_indices = indices.size();
+
+    check_mesh_validity(vertices, indices);
+
     setup_VBO(vertices);
     setup_EBO(indices);
 }
@@ -121,6 +133,11 @@ void MyGL::Mesh::update_indices(const std::vector<GLuint> &indices)
 {
     if (indices.size() != num_indices)
         throw std::runtime_error("Mesh update failed: New indices count must match original count");
+
+    auto max_index_iter = std::max_element(indices.begin(), indices.end());
+    if (max_index_iter != indices.end() && *max_index_iter >= num_vertices)
+        throw std::runtime_error("Mesh update failed: index out of bounds. Max index: " +
+                                 std::to_string(*max_index_iter) + ", vertex count: " + std::to_string(num_vertices));
 
     setup_EBO(indices);
 }
