@@ -11,7 +11,7 @@ namespace MyGL
 class PointCloud
 {
   public:
-    PointCloud(const std::vector<glm::vec3> &vertices);
+    PointCloud(const std::vector<glm::vec3> &vertices = {});
     PointCloud(std::vector<glm::vec3> &&vertices);
     ~PointCloud();
 

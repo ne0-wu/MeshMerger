@@ -20,6 +20,8 @@ MyGL::PointCloud::~PointCloud()
 
 void MyGL::PointCloud::update(const std::vector<glm::vec3> &vertices)
 {
+    num_vertices = vertices.size();
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
 }

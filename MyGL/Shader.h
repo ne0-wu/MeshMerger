@@ -80,11 +80,11 @@ class ShaderProgram
         return ID;
     }
 
-    void use()
+    void use() const
     {
         glUseProgram(ID);
     }
-    void unuse()
+    void unuse() const
     {
         glUseProgram(0);
     }
