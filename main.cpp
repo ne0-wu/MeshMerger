@@ -20,6 +20,7 @@ struct Flags
     } draw_mode = InteractionMode::DEFAULT;
 
     bool draw_wireframe = true;
+    bool show_log_console = false;
 } flags;
 
 const char *InteractionModeItems[] = {"Default", "Select Vertex"};
@@ -160,20 +161,18 @@ int main()
 
         // Move mesh to [-1, 1]^3
         glm::mat4 model; // for convenience, we represent translation of models in the model matrix
-        Eigen::Vector3d center{0.0, 0.0, 0.0},
-            min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
-                std::numeric_limits<double>::max()},
-            max{std::numeric_limits<double>::min(), std::numeric_limits<double>::min(),
-                std::numeric_limits<double>::min()};
+        Eigen::Vector3d min = Eigen::Vector3d::Constant(std::numeric_limits<double>::max());
+        Eigen::Vector3d max = Eigen::Vector3d::Constant(std::numeric_limits<double>::min());
+
         for (const auto &v : mesh.vertices())
         {
             const auto &point = mesh.point(v);
             min = min.cwiseMin(point);
             max = max.cwiseMax(point);
         }
-        center = (min + max) / 2.0;
-        const auto scale = 2.0 / (max - min).maxCoeff();
 
+        Eigen::Vector3d center = (min + max) / 2.0;
+        const auto scale = 2.0 / (max - min).maxCoeff();
         model = glm::scale(glm::mat4(1.0f), glm::vec3(scale)) *
                 glm::translate(glm::mat4(1.0f), glm::vec3(-center[0], -center[1], -center[2]));
 
@@ -223,11 +222,14 @@ int main()
                 pick_vertex.pick({mouse_pos.x, height - mouse_pos.y}, gl_mesh, {model, view, projection});
             }
 
-            auto selected_vertex = Mesh::VertexHandle(pick_vertex.get_picked_vertex());
-            if (ImGui::IsMouseClicked(0) && selected_vertex.is_valid())
-            {
-                select_seam_0.add_vertex(selected_vertex);
-            }
+            auto hovered_vertex = Mesh::VertexHandle(pick_vertex.get_picked_vertex());
+            if (hovered_vertex.is_valid())
+                status_bar.set_text("Hovered vertex: " + std::to_string(hovered_vertex.idx()));
+            else
+                status_bar.set_text("No vertex hovered");
+
+            if (ImGui::IsMouseClicked(0) && hovered_vertex.is_valid())
+                select_seam_0.add_vertex(hovered_vertex);
 
             // ImGUI
             // ==================================================
@@ -238,17 +240,19 @@ int main()
             ImGui::Begin("Settings");
 
             ImGui::Checkbox("Draw wireframe", &flags.draw_wireframe);
+            ImGui::Checkbox("Show log console", &flags.show_log_console);
 
-            int currentItem = static_cast<int>(flags.draw_mode);
-            if (ImGui::Combo("Interaction Mode", &currentItem, InteractionModeItems,
-                             IM_ARRAYSIZE(InteractionModeItems)))
-                flags.draw_mode = static_cast<Flags::InteractionMode>(currentItem);
+            // int currentItem = static_cast<int>(flags.draw_mode);
+            // if (ImGui::Combo("Interaction Mode", &currentItem, InteractionModeItems,
+            //                  IM_ARRAYSIZE(InteractionModeItems)))
+            //     flags.draw_mode = static_cast<Flags::InteractionMode>(currentItem);
 
             ImGui::End();
 
             status_bar.draw();
 
-            logger.draw();
+            if (flags.show_log_console)
+                logger.draw();
 
             // Render
             // ==================================================
